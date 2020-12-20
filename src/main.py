@@ -63,7 +63,15 @@ for female in females:
     female.setupPartners(males)
 
 
-truthBooths = [('Chris T', 'Shanley', False), ('Ethan', 'Jess', False), ('Dillan', 'Jess', False), ('JJ', 'Simone', False), ('Dre', 'Ashleigh', False), ('Dillan', 'Coleysia', True), ('Chris T', 'Paige', True), ('Ryan', 'Kayla', False)]
+truthBooths = []
+truthBooths.add(('Chris T', 'Shanley',  False))
+truthBooths.add(('Ethan',   'Jess',     False))
+truthBooths.add(('Dillan',  'Jess',     False))
+truthBooths.add(('JJ',      'Simone',   False))
+truthBooths.add(('Dre',     'Ashleigh', False))
+truthBooths.add(('Dillan',  'Coleysia', True))
+truthBooths.add(('Chris T', 'Paige',    True))
+truthBooths.add(('Ryan',    'Kayla',    False))
 
 for t in truthBooths:
     p1 = get(males, t[0])
