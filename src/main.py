@@ -15,40 +15,27 @@ class Person:
     def becomeMatched(self, other):
         self.perfectMatch = other
 
-    def filterMatches(self): ## TODO, should update to remove on matches, instead of checking repeatedly
-        for match in self.possibleMatches:
-            if (match.isMatched()):
-                self.possibleMatches.pop(match.name)
-
     def remainingMatches(self):
-        self.filterMatches()
         return self.possibleMatches
 
     def printMatches(self):
         if (self.isMatched()):
             print(f'{self.name} is a perfect match with {self.perfectMatch.name}!\n')
         else:
-            self.filterMatches()
             print(f'{self.name}\'s possible matches:')
-            for match in self.possibleMatches:
-                print(f'{self.name} - {match.name}')
+            for matchName in self.possibleMatches:
+                print(f'{self.name} - {matchName}')
             print('')
 
-    def truthBooth(self, partner, isMatch):
-        if (isMatch):
-            self.becomeMatched(partner)
-            partner.becomeMatched(self)
-        else:
-            self.possibleMatches.pop(partner.name)
-            partner.possibleMatches.pop(self.name)
+    def failedMatch(self, partner):
+        self.unmatch(partner.name)
+        partner.unmatch(self.name)
+
+    def unmatch(self, value):
+        if value in self.possibleMatches:
+            self.possibleMatches.pop(value)
 
 
-# TODO, could optimize by converting males and females to map[name -> object]
-def get(lst, name): ## get person from name
-    for p in lst:
-        if (p.name == name):
-            return p
-    return None
 
 maleNames = ['Adam', 'Dre', 'Scali', 'Chris T', 'Dillan', 'Ethan', 'Joey', 'JJ', 'Ryan', 'Wes']
 males = dict(map(lambda name: (name, Person(name, True)), maleNames))
@@ -76,8 +63,21 @@ truthBooths.append(('Ryan',    'Kayla',    False))
 for t in truthBooths:
     p1 = males[t[0]]
     p2 = females[t[1]]
-    print(t)
-    p1.truthBooth(p2, t[2])
 
-for male in males:
-    male.printMatches()
+    # print(t)
+    # p1.printMatches()
+    # p2.printMatches()
+
+    if (t[2]):
+        p1.becomeMatched(p2)
+        p2.becomeMatched(p1)
+        # p1.perfectMatch(p2)
+        for maleName in males:
+            males[maleName].unmatch(p2)
+        for femaleName in females:
+            females[femaleName].unmatch(p1)
+    else: # no match.. :(
+        p1.failedMatch(p2)
+
+for maleName in males:
+    males[maleName].printMatches()
