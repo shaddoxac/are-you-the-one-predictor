@@ -54,28 +54,31 @@ truthBooths.append(('Chris T', 'Paige',    True))
 truthBooths.append(('Ryan',    'Kayla',    False))
 
 lights = []
+lights.append((2, [('Adam', 'Brittany'), ('Dre', 'Jacy'), ('Scali', 'Ashleigh'), ('Chris T', 'Jess'), ('Dillan', 'Coleysia'), ('Ethan', 'Shanley'), ('Joey', 'Paige'), ('JJ', 'Simone'), ('Ryan', 'Amber'), ('Wes', 'Kayla')]))
+
+# lights.append((2, [('Adam', ''), ('Dre', ''), ('Scali', ''), ('Chris T', ''), ('Dillan', ''), ('Ethan', ''), ('Joey', '') ('JJ', ''), ('Ryan', ''), ('Wes', '')]))
 
 
 lastIndex = 1 ## will go through the first {lastIndex} days
 
 for i in range(0, lastIndex):
-    (male, female, isPerfectMatch) = truthBooths[i]
-
+    (pairMaleName, pairFemaleName, isPerfectMatch) = truthBooths[i]
+    pairMale = males[pairMaleName]
+    pairFemale = females[pairFemaleName]
     # male.printMatches()
     # female.printMatches()
 
     if isPerfectMatch:
-        male.becomeMatched(female)
-        female.becomeMatched(male)
+        pairMale.becomeMatched(pairFemale)
+        pairFemale.becomeMatched(pairMale)
 
-        for maleName in males:
-            males[maleName].unmatch(female)
+        for mName in males:
+            males[mName].unmatch(pairFemaleName)
         for femaleName in females:
-            females[femaleName].unmatch(male)
+            females[fName].unmatch(pairMaleName)
     else: # no match.. :(
-        male.unmatch(female.name)
-        female.unmatch(male.name)
-
+        pairMale.unmatch(pairFemaleName)
+        pairFemale.unmatch(pairMaleName)
 
 
 for maleName in males:
