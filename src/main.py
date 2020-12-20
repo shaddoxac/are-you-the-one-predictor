@@ -15,9 +15,6 @@ class Person:
     def becomeMatched(self, other):
         self.perfectMatch = other
 
-    def remainingMatches(self):
-        return self.possibleMatches
-
     def printMatches(self):
         if (self.isMatched()):
             print(f'{self.name} is a perfect match with {self.perfectMatch.name}!\n')
@@ -26,10 +23,6 @@ class Person:
             for matchName in self.possibleMatches:
                 print(f'{self.name} - {matchName}')
             print('')
-
-    def failedMatch(self, partner):
-        self.unmatch(partner.name)
-        partner.unmatch(self.name)
 
     def unmatch(self, value):
         if value in self.possibleMatches:
@@ -60,24 +53,35 @@ truthBooths.append(('Dillan',  'Coleysia', True))
 truthBooths.append(('Chris T', 'Paige',    True))
 truthBooths.append(('Ryan',    'Kayla',    False))
 
-for t in truthBooths:
-    p1 = males[t[0]]
-    p2 = females[t[1]]
+lights = []
 
-    # print(t)
-    # p1.printMatches()
-    # p2.printMatches()
 
-    if (t[2]):
-        p1.becomeMatched(p2)
-        p2.becomeMatched(p1)
-        # p1.perfectMatch(p2)
+lastIndex = 1 ## will go through the first {lastIndex} days
+
+for i in range(0, lastIndex):
+    (male, female, isPerfectMatch) = truthBooths[i]
+
+    # male.printMatches()
+    # female.printMatches()
+
+    if isPerfectMatch:
+        male.becomeMatched(female)
+        female.becomeMatched(male)
+
         for maleName in males:
-            males[maleName].unmatch(p2)
+            males[maleName].unmatch(female)
         for femaleName in females:
-            females[femaleName].unmatch(p1)
+            females[femaleName].unmatch(male)
     else: # no match.. :(
-        p1.failedMatch(p2)
+        male.unmatch(female.name)
+        female.unmatch(male.name)
+
+
 
 for maleName in males:
     males[maleName].printMatches()
+
+
+# other notes
+# secondary group (either males or females, arbitrary) doesn't need to be tracked, as all relationships are
+# reciprocal and displayed on one group as the other. Primary group can track everything
