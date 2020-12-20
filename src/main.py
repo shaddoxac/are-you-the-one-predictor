@@ -18,7 +18,7 @@ class Person:
     def filterMatches(self): ## TODO, should update to remove on matches, instead of checking repeatedly
         for match in self.possibleMatches:
             if (match.isMatched()):
-                self.possibleMatches.remove(match)
+                self.possibleMatches.pop(match.name)
 
     def remainingMatches(self):
         self.filterMatches()
@@ -39,8 +39,8 @@ class Person:
             self.becomeMatched(partner)
             partner.becomeMatched(self)
         else:
-            self.possibleMatches.remove(partner)
-            partner.possibleMatches.remove(self)
+            self.possibleMatches.pop(partner.name)
+            partner.possibleMatches.pop(self.name)
 
 
 # TODO, could optimize by converting males and females to map[name -> object]
@@ -51,31 +51,32 @@ def get(lst, name): ## get person from name
     return None
 
 maleNames = ['Adam', 'Dre', 'Scali', 'Chris T', 'Dillan', 'Ethan', 'Joey', 'JJ', 'Ryan', 'Wes']
-males = list(map(lambda name: Person(name, True), maleNames))
+males = dict(map(lambda name: (name, Person(name, True)), maleNames))
 
 femaleNames = ['Amber', 'Ashleigh', 'Brittany', 'Coleysia', 'Jacy', 'Jess', 'Kayla', 'Paige', 'Shanley', 'Simone']
-females = list(map(lambda name: Person(name, False), femaleNames))
+females = dict(map(lambda name: (name, Person(name, False)), femaleNames))
 
-for male in males:
-    male.setupPartners(females)
+for maleName in males:
+    males[maleName].setupPartners(females)
 
-for female in females:
-    female.setupPartners(males)
+for femaleName in females:
+    females[femaleName].setupPartners(males)
 
 
 truthBooths = []
-truthBooths.add(('Chris T', 'Shanley',  False))
-truthBooths.add(('Ethan',   'Jess',     False))
-truthBooths.add(('Dillan',  'Jess',     False))
-truthBooths.add(('JJ',      'Simone',   False))
-truthBooths.add(('Dre',     'Ashleigh', False))
-truthBooths.add(('Dillan',  'Coleysia', True))
-truthBooths.add(('Chris T', 'Paige',    True))
-truthBooths.add(('Ryan',    'Kayla',    False))
+truthBooths.append(('Chris T', 'Shanley',  False))
+truthBooths.append(('Ethan',   'Jess',     False))
+truthBooths.append(('Dillan',  'Jess',     False))
+truthBooths.append(('JJ',      'Simone',   False))
+truthBooths.append(('Dre',     'Ashleigh', False))
+truthBooths.append(('Dillan',  'Coleysia', True))
+truthBooths.append(('Chris T', 'Paige',    True))
+truthBooths.append(('Ryan',    'Kayla',    False))
 
 for t in truthBooths:
-    p1 = get(males, t[0])
-    p2 = get(females, t[1])
+    p1 = males[t[0]]
+    p2 = females[t[1]]
+    print(t)
     p1.truthBooth(p2, t[2])
 
 for male in males:
