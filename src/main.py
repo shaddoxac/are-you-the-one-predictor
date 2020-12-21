@@ -1,4 +1,4 @@
-
+lastIndex = 10 ## will go through at most the first {lastIndex} days
 
 class Person:
     def __init__(self, name, isMale):
@@ -9,14 +9,19 @@ class Person:
     def setupPartners(self, possibleMatches):
         self.possibleMatches = possibleMatches.copy()
 
-    def isMatched(self):
+    def hasPerfectMatch(self):
         return self.perfectMatch != None
 
     def becomeMatched(self, other):
         self.perfectMatch = other
+        # clear other matches
+        self.possibleMatches = {(other.name, other)}
+
+    def isPerfectMatchWith(self, other):
+        return self.hasPerfectMatch() and self.perfectMatch.name == other.name
 
     def printMatches(self):
-        if (self.isMatched()):
+        if (self.hasPerfectMatch()):
             print(f'{self.name} is a perfect match with {self.perfectMatch.name}!\n')
         else:
             print(f'{self.name}\'s possible matches:')
@@ -59,9 +64,8 @@ lights.append((2, [('Adam', 'Brittany'), ('Dre', 'Jacy'), ('Scali', 'Ashleigh'),
 # lights.append((2, [('Adam', ''), ('Dre', ''), ('Scali', ''), ('Chris T', ''), ('Dillan', ''), ('Ethan', ''), ('Joey', '') ('JJ', ''), ('Ryan', ''), ('Wes', '')]))
 
 
-lastIndex = 1 ## will go through the first {lastIndex} days
 
-for i in range(0, lastIndex):
+for i in range(0, min(lastIndex, len(truthBooths))):
     (pairMaleName, pairFemaleName, isPerfectMatch) = truthBooths[i]
     pairMale = males[pairMaleName]
     pairFemale = females[pairFemaleName]
@@ -74,11 +78,44 @@ for i in range(0, lastIndex):
 
         for mName in males:
             males[mName].unmatch(pairFemaleName)
-        for femaleName in females:
+        for fName in females:
             females[fName].unmatch(pairMaleName)
     else: # no match.. :(
         pairMale.unmatch(pairFemaleName)
         pairFemale.unmatch(pairMaleName)
+
+
+# handle [0-lastIndex] lights
+for i in range (0, min(lastIndex, len(lights))):
+    (unknownLights, testedMatches) = lights[i]
+    possibleMatches = 10 ## will decrement as 'wrong' matches are discovered
+
+    toExamine = []
+
+    for (maleMatchName, femaleMatchName) in testedMatches:
+        maleMatch = males[maleMatchName]
+        femaleMatch = females[femaleMatchName]
+
+        if maleMatch.isPerfectMatchWith(femaleMatch):
+            # treat this case as a known, can disregard 1 light
+            unknownLights -= 1
+            possibleMatches -= 1
+        elif femaleMatchName in maleMatch.possibleMatches:
+            # matches are reciprocal, only have to check one
+            # these are possible, let's look at the odds after seeing all couples
+            toExamine.append((maleMatch, femaleMatch))
+        else:
+            # can't be a match
+            possibleMatches -= 1
+
+    # print(unknownLights)
+    # print(len(toExamine))
+    odds = (unknownLights * 100.0) / len(toExamine) # assuming an even distribution across all matched couples
+    for (maleMatch, femaleMatch) in toExamine:
+        print(f'{maleMatch.name} and {femaleMatch.name} have {odds}% of being a match')
+        if (odds == 0):
+            male.unmatch(female.name)
+            female.unmatch(male.name)
 
 
 for maleName in males:
