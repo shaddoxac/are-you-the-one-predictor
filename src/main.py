@@ -10,30 +10,42 @@ class Odds:
     def overallOdds(self, remainingPossible):
         return 1.0 / remainingPossible
 
-    # use sum of divisors to interpret each percentage per person
-    # aka - use bestOddFoundFromLights (defaulting to naiveOverallOdds if not found)
-    # divided by all divisors in relation to the numerators used
+    def intDivide(self, a, b):
+        return (a + 0.0) / b
+
     def calculateCurrentOdds(self, possibleMatches):
         numPossible = len(possibleMatches)
-        naiveOverallOdds = self.overallOdds(numPossible)
-        bestMatchFound = {}
+        bestMatchFound = {} # dict of [matchName -> (best found odds per person, divisor used)]
 
         for matchName in possibleMatches:
-            bestMatchFound[matchName] = (naiveOverallOdds, numPossible) # start with naive, update later if more accurate odds are found
+            bestMatchFound[matchName] = (1, numPossible) # start with naive, update later if more accurate odds are found
 
         for (matchName, numerator, divisor) in self.lightOdds:
             if divisor > 0:
-                foundOdds = (numerator + 0.0) / divisor
-                if (foundOdds > bestMatchFound[matchName][0]): # use best found odds
-                    bestMatchFound[matchName] = (foundOdds, divisor)
+                foundOdds = self.intDivide(numerator, divisor)
+                existingOdds = self.intDivide(bestMatchFound[matchName][0], bestMatchFound[matchName][1])
+                if (foundOdds > existingOdds): # use best found odds
+                    print(f'{foundOdds} was greater than {existingOdds}')
+                    bestMatchFound[matchName] = (numerator, divisor)
 
-        totalDivisorSumFromLights = 0 # get divisor to use from best matches found
+        # todo, move to new function
+        totalDivisorSumFromLights = 1 # get divisor to force everything to same scale
         for matchName in bestMatchFound:
-            totalDivisorSumFromLights = bestMatchFound[matchName][1]
+            totalDivisorSumFromLights *= bestMatchFound[matchName][1]
+
+        adjustedNumerators = {} # put everything in relation to the same divisor
+        for matchName in possibleMatches:
+            (currentNumerator, currentDivisor) = bestMatchFound[matchName]
+            adjustedNumerators[matchName] = self.intDivide(currentNumerator *  totalDivisorSumFromLights, currentDivisor)
+
+        sumOfNumerators = 0
+        for matchName in possibleMatches:
+            sumOfNumerators += adjustedNumerators[matchName]
 
         returnValues = {} # dict of match name -> percentage chance
         for matchName in possibleMatches:
-            returnValues[matchName] = bestMatchFound[matchName][0] / totalDivisorSumFromLights
+            print(f'{matchName} - {adjustedNumerators[matchName]} - {sumOfNumerators}')
+            returnValues[matchName] = adjustedNumerators[matchName] / sumOfNumerators
 
         return returnValues
 
