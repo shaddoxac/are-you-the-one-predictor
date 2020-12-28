@@ -35,15 +35,12 @@ class Odds:
 
         return returnValues
 
-    def printOdds(self, possibleMatches):
-        for tup in self.calculateCurrentOdds(possibleMatches):
-            print(tup)
-
 class Person:
     def __init__(self, name, isMale):
         self.name = name
         self.isMale = isMale
         self.perfectMatch = None
+        self.odds = Odds()
 
     def setupPartners(self, possibleMatches):
         self.possibleMatches = possibleMatches.copy()
@@ -68,9 +65,16 @@ class Person:
                 print(f'{self.name} - {matchName}')
             print('')
 
+    def printOdds(self):
+        for tup in self.odds.calculateCurrentOdds(self.possibleMatches):
+            print(tup)
+
     def unmatch(self, value):
         if value in self.possibleMatches:
             self.possibleMatches.pop(value)
+
+    def addLightOdds(self, matchName, numerator, divisor):
+        self.odds.add(matchName, numerator, divisor)
 
 
 
@@ -150,18 +154,24 @@ for i in range (0, min(lastIndex, len(lights))):
             possibleMatches -= 1
 
     print(f'{unknownLights} of the next {len(toExamine)} are matches!')
+
+    divisor = len(toExamine)
     # print(unknownLights)
-    # print(len(toExamine))
-    odds = (unknownLights * 100.0) / len(toExamine) # assuming an even distribution across all matched couples
+    # print(divisor)
+    odds = (unknownLights * 100.0) / divisor # assuming an even distribution across all matched couples
     for (maleMatch, femaleMatch) in toExamine:
         print(f'{maleMatch.name} and {femaleMatch.name} have {odds}% of being a match')
         if (odds == 0):
             male.unmatch(female.name)
             female.unmatch(male.name)
+        else:
+            male.addToLights(female.name, unknownLights, divisor)
 
 
 for maleName in males:
-    males[maleName].printMatches()
+    # males[maleName].printMatches()
+    males[maleName].printOdds()
+
 
 
 # other notes
