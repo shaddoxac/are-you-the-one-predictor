@@ -2,36 +2,38 @@ lastIndex = 10 ## will go through at most the first {lastIndex} days
 
 class Odds:
     def __init__(self):
-        lightOdds = []
+        self.lightOdds = []
 
     def add(self, matchName, numerator, divisor):
-        lightOdds.append((matchName, numerator, divisor))
+        self.lightOdds.append((matchName, numerator, divisor))
 
     def overallOdds(self, remainingPossible):
         return 1.0 / remainingPossible
 
     # use sum of divisors to interpret each percentage per person
     # aka - use bestOddFoundFromLights (defaulting to naiveOverallOdds if not found)
-    # divided by (totalDivisorSumFromLights + remainingPossible)
+    # divided by all divisors in relation to the numerators used
     def calculateCurrentOdds(self, possibleMatches):
         numPossible = len(possibleMatches)
         naiveOverallOdds = self.overallOdds(numPossible)
-        totalDivisorSumFromLights = 0
         bestMatchFound = {}
 
         for matchName in possibleMatches:
-            bestMatchFound.put(matchName, naiveOverallOdds)
+            bestMatchFound[matchName] = (naiveOverallOdds, numPossible) # start with naive, update later if more accurate odds are found
 
-        for (matchName, numerator, divisor) in lightOdds:
-            totalDivisorSumFromLights += divisor
+        for (matchName, numerator, divisor) in self.lightOdds:
+            if divisor > 0:
+                foundOdds = (numerator + 0.0) / divisor
+                if (foundOdds > bestMatchFound[matchName][0]): # use best found odds
+                    bestMatchFound[matchName] = (foundOdds, divisor)
 
-            foundOdds = (numerator + 0.0) / divisor
-            if (foundOdds > bestMatchFound[matchName]): ## use best found odds
-                bestMatchFound[matchName] = foundOdds
+        totalDivisorSumFromLights = 0 # get divisor to use from best matches found
+        for matchName in bestMatchFound:
+            totalDivisorSumFromLights = bestMatchFound[matchName][1]
 
-        returnValues = {} ## dict of match name -> percentage chance
+        returnValues = {} # dict of match name -> percentage chance
         for matchName in possibleMatches:
-            returnValues.put(matchName, bestMatchFound[matchName] / totalDivisorSumFromLights)
+            returnValues[matchName] = bestMatchFound[matchName][0] / totalDivisorSumFromLights
 
         return returnValues
 
@@ -66,8 +68,14 @@ class Person:
             print('')
 
     def printOdds(self):
-        for tup in self.odds.calculateCurrentOdds(self.possibleMatches):
-            print(tup)
+        if (self.hasPerfectMatch()):
+            print(f'{self.name} is a perfect match with {self.perfectMatch.name}!\n')
+        else:
+            print(f'{self.name}\'s possible matches:')
+            currentOdds = self.odds.calculateCurrentOdds(self.possibleMatches)
+            for matchName in currentOdds:
+                print(f'{self.name} - {matchName} - {currentOdds[matchName]}')
+            print('')
 
     def unmatch(self, value):
         if value in self.possibleMatches:
@@ -162,10 +170,10 @@ for i in range (0, min(lastIndex, len(lights))):
     for (maleMatch, femaleMatch) in toExamine:
         print(f'{maleMatch.name} and {femaleMatch.name} have {odds}% of being a match')
         if (odds == 0):
-            male.unmatch(female.name)
-            female.unmatch(male.name)
+            maleMatch.unmatch(femaleMatch.name)
+            femaleMatch.unmatch(maleMatch.name)
         else:
-            male.addToLights(female.name, unknownLights, divisor)
+            maleMatch.addLightOdds(femaleMatch.name, unknownLights, divisor)
 
 
 for maleName in males:
