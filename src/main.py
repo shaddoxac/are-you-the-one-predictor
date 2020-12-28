@@ -1,5 +1,44 @@
 lastIndex = 10 ## will go through at most the first {lastIndex} days
 
+class Odds:
+    def __init__(self):
+        lightOdds = []
+
+    def add(self, matchName, numerator, divisor):
+        lightOdds.append((matchName, numerator, divisor))
+
+    def overallOdds(self, remainingPossible):
+        return 1.0 / remainingPossible
+
+    # use sum of divisors to interpret each percentage per person
+    # aka - use bestOddFoundFromLights (defaulting to naiveOverallOdds if not found)
+    # divided by (totalDivisorSumFromLights + remainingPossible)
+    def calculateCurrentOdds(self, possibleMatches):
+        numPossible = len(possibleMatches)
+        naiveOverallOdds = self.overallOdds(numPossible)
+        totalDivisorSumFromLights = 0
+        bestMatchFound = {}
+
+        for matchName in possibleMatches:
+            bestMatchFound.put(matchName, naiveOverallOdds)
+
+        for (matchName, numerator, divisor) in lightOdds:
+            totalDivisorSumFromLights += divisor
+
+            foundOdds = (numerator + 0.0) / divisor
+            if (foundOdds > bestMatchFound[matchName]): ## use best found odds
+                bestMatchFound[matchName] = foundOdds
+
+        returnValues = {} ## dict of match name -> percentage chance
+        for matchName in possibleMatches:
+            returnValues.put(matchName, bestMatchFound[matchName] / totalDivisorSumFromLights)
+
+        return returnValues
+
+    def printOdds(self, possibleMatches):
+        for tup in self.calculateCurrentOdds(possibleMatches):
+            print(tup)
+
 class Person:
     def __init__(self, name, isMale):
         self.name = name
