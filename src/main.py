@@ -49,6 +49,32 @@ class Odds:
 
         return returnValues
 
+class Possibilities:
+
+    def __init__(self, males, females):
+        self.possibilities = []
+        self.combos({}, males, females)
+
+    def combos(self, prevDict, males, females):
+        if (len(males) == 0): # if one is empty, both should be
+            self.possibilities.append(prevDict)
+        else:
+            for maleName in males:
+                for femaleName in females:
+                    # this part creates far more overhead than I'd like, should be able to optimize later
+                    curMales = list(males)
+                    curFemales = list(females)
+                    curMales.remove(maleName)
+                    curFemales.remove(femaleName)
+                    curDict = prevDict.copy()
+                    curDict[maleName] = femaleName
+                    self.combos(curDict, curMales, curFemales)
+
+
+    def numRemainingCombinations(self):
+        return len(self.possibilities)
+
+
 class Person:
     def __init__(self, name, isMale):
         self.name = name
@@ -110,6 +136,8 @@ for maleName in males:
 for femaleName in females:
     females[femaleName].setupPartners(males)
 
+possibilities = Possibilities(males, females)
+print(f'Remaining combinations: {possibilities.numRemainingCombinations()}')
 
 truthBooths = []
 truthBooths.append(('Chris T', 'Shanley',  False))
