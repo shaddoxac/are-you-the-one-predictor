@@ -57,6 +57,7 @@ class Possibilities:
         self.females = females
         self.numMales = len(males)
         self.numFemales = len(females)
+        self.foundPossibilities = 0
 
         maleIndexes   = [-1] * self.numMales
         femaleIndexes = [-1] * self.numFemales
@@ -73,15 +74,22 @@ class Possibilities:
                         maleIndexes[maleIndex] = femaleIndex
                         femaleIndexes[femaleIndex] = maleIndex
 
-                        self.efficientCombos(maleIndexes, femaleIndexes)
+                        self.initialCombinations(maleIndexes, femaleIndexes)
 
                         # don't need to reset maleIndex, since it will be changed again next loop or after exiting
                         femaleIndexes[femaleIndex] = -1
 
                 maleIndexes[maleIndex] = -1
-        if nuMatched == 0:
+        if numMatched == 0:
             # every male was matched up - meaning we have a possible solution, let's add it
-            self.possibilities.append(prevDict)
+            self.possibilities.append(maleIndexes.copy())
+            self.foundPossibilities += 1
+            if self.foundPossibilities % 10000 == 0:
+                print(f'{self.foundPossibilities} possibilities found.')
+
+            if self.foundPossibilities == 2 or self.foundPossibilities == 3:
+                for possibility in self.possibilities:
+                    print(possibility)
 
 
     def combos(self, prevDict, males, females):
