@@ -69,17 +69,8 @@ class Possibilities:
             if maleIndexes[maleIndex] == -1: # if this male does not already have a match..
                 numMatched += 1
 
-                for femaleIndex in range(0, self.numFemales):
-                    if femaleIndexes[femaleIndex] == -1: # if one of their matches does not already have a match..
-                        maleIndexes[maleIndex] = femaleIndex
-                        femaleIndexes[femaleIndex] = maleIndex
+                self.initialCombinationsMatchups(maleIndexes, femaleIndexes, male)
 
-                        self.initialCombinations(maleIndexes, femaleIndexes)
-
-                        # don't need to reset maleIndex, since it will be changed again next loop or after exiting
-                        femaleIndexes[femaleIndex] = -1
-
-                maleIndexes[maleIndex] = -1
         if numMatched == 0:
             # every male was matched up - meaning we have a possible solution, let's add it
             self.possibilities.append(maleIndexes.copy())
@@ -87,10 +78,27 @@ class Possibilities:
             if self.foundPossibilities % 10000 == 0:
                 print(f'{self.foundPossibilities} possibilities found.')
 
-            if self.foundPossibilities == 2 or self.foundPossibilities == 3:
+            if self.foundPossibilities == 3 or self.foundPossibilities == 4:
+                print(f'Possibility: {self.foundPossibilities}')
+
                 for possibility in self.possibilities:
                     print(possibility)
 
+    def initialCombinationsMatchups(self, maleIndexes, femaleIndexes, currentMaleIndex):
+        for femaleIndex in range(0, self.numFemales):
+            if femaleIndexes[femaleIndex] == -1: # if one of their matches does not already have a match..
+                self.initialCombinationsPair(maleIndexes, femaleIndexes, currentMaleIndex, currentFemaleIndex)
+
+        maleIndexes[currentMaleIndex] = -1
+
+    def initialCombinationsPair(self, maleIndexes, femaleIndexes, currentMaleIndex, currentFemaleIndex):
+        maleIndexes[currentMaleIndex] = currentFemaleIndex
+        femaleIndexes[currentFemaleIndex] = currentMaleIndex
+
+        self.initialCombinations(maleIndexes, femaleIndexes)
+
+        # don't need to reset maleIndex, since it will be changed again next loop or after exiting
+        femaleIndexes[femaleIndex] = -1
 
     def combos(self, prevDict, males, females):
         if (len(males) == 0): # if one is empty, both should be
