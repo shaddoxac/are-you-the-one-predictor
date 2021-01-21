@@ -88,25 +88,29 @@ class Possibilities:
         # don't need to reset maleIndex, since it will be changed again next loop or after exiting
         self.femaleIndexes[currentFemaleIndex] = -1
 
-    def combos(self, prevDict, males, females):
-        if (len(males) == 0): # if one is empty, both should be
-            self.possibilities.append(prevDict)
-        else:
-            for maleName in males:
-                for femaleName in females:
-                    # this part creates far more overhead than I'd like, should be able to optimize later
-                    curMales = list(males)
-                    curFemales = list(females)
-                    curMales.remove(maleName)
-                    curFemales.remove(femaleName)
-                    curDict = prevDict.copy()
-                    curDict[maleName] = femaleName
-                    self.combos(curDict, curMales, curFemales)
-
 
     def numRemainingCombinations(self):
-        return len(self.possibilities)
+        return self.foundPossibilities
 
+
+    def filterPerfectMatch(self, combination, maleIndex, femaleIndex):
+        combination[maleIndex] == femaleIndex
+
+    def updatePerfectMatch(self, maleIndex, femaleIndex):
+        self.possibilities = filter(lambda combination: self.filterPerfectMatch(combination, maleIndex, femaleIndex), self.possibilities)
+
+
+    def filterLights(self, combination, lightMatchups, numLights):
+        for index in range(0, self.numMales):
+            if lightMatchups[index] == combination[index]:
+                numLights -= 1
+                if numLights < 0: # if we've already exceeded our limit, just go ahead and return false
+                    return False
+
+        return numLights == 0 # if number of found matches turned expectedCount exactly to 0, this situation is possible
+
+    def updateLights(self, lightMatchups, numLights):
+        self.possibilities = filter(lambda combination: self.filterLights(combination, lightMatchups, numLights), self.possibilities)
 
 class Person:
     def __init__(self, name, isMale):
