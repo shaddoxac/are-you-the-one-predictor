@@ -1,54 +1,5 @@
 lastIndex = 10 ## will go through at most the first {lastIndex} days
 
-class Odds:
-    def __init__(self):
-        self.lightOdds = []
-
-    def add(self, matchName, numerator, divisor):
-        self.lightOdds.append((matchName, numerator, divisor))
-
-    def overallOdds(self, remainingPossible):
-        return 1.0 / remainingPossible
-
-    def intDivide(self, a, b):
-        return (a + 0.0) / b
-
-    def calculateCurrentOdds(self, possibleMatches):
-        numPossible = len(possibleMatches)
-        bestMatchFound = {} # dict of [matchName -> (best found odds per person, divisor used)]
-
-        for matchName in possibleMatches:
-            bestMatchFound[matchName] = (1, numPossible) # start with naive, update later if more accurate odds are found
-
-        for (matchName, numerator, divisor) in self.lightOdds:
-            if divisor > 0:
-                foundOdds = self.intDivide(numerator, divisor)
-                existingOdds = self.intDivide(bestMatchFound[matchName][0], bestMatchFound[matchName][1])
-                if (foundOdds > existingOdds): # use best found odds
-                    print(f'{foundOdds} was greater than {existingOdds}')
-                    bestMatchFound[matchName] = (numerator, divisor)
-
-        # todo, move to new function
-        totalDivisorSumFromLights = 1 # get divisor to force everything to same scale
-        for matchName in bestMatchFound:
-            totalDivisorSumFromLights *= bestMatchFound[matchName][1]
-
-        adjustedNumerators = {} # put everything in relation to the same divisor
-        for matchName in possibleMatches:
-            (currentNumerator, currentDivisor) = bestMatchFound[matchName]
-            adjustedNumerators[matchName] = self.intDivide(currentNumerator *  totalDivisorSumFromLights, currentDivisor)
-
-        sumOfNumerators = 0
-        for matchName in possibleMatches:
-            sumOfNumerators += adjustedNumerators[matchName]
-
-        returnValues = {} # dict of match name -> percentage chance
-        for matchName in possibleMatches:
-            print(f'{matchName} - {adjustedNumerators[matchName]} - {sumOfNumerators}')
-            returnValues[matchName] = adjustedNumerators[matchName] / sumOfNumerators
-
-        return returnValues
-
 class Possibilities:
 
     def __init__(self, males, females):
@@ -90,7 +41,7 @@ class Possibilities:
 
 
     def numRemainingCombinations(self):
-        return self.foundPossibilities
+        return len(self.possibilities)
 
 
     def filterPerfectMatch(self, combination, maleIndex, femaleIndex):
@@ -112,12 +63,26 @@ class Possibilities:
     def updateLights(self, lightMatchups, numLights):
         self.possibilities = filter(lambda combination: self.filterLights(combination, lightMatchups, numLights), self.possibilities)
 
+    def getAllProbabilities(self):
+        probabilities = [{}] * self.numMales
+        for poss in self.possibilities:
+            for maleIndex in poss:
+                if femaleIndex not in probabilities[maleIndex]:
+                    probabilities[maleIndex][femaleIndex] = 1
+                else:
+                    probabilities[maleIndex][femaleIndex] += 1
+
+        finalProbabilities = []
+        divisor = self.numRemainingCombinations()
+        
+        for prob in probabilities:
+            finalProbabilities.append(map(prob, lambda numMatches: numMatches * 1.0 / divisor))
+
 class Person:
     def __init__(self, name, isMale):
         self.name = name
         self.isMale = isMale
         self.perfectMatch = None
-        self.odds = Odds()
 
     def setupPartners(self, possibleMatches):
         self.possibleMatches = possibleMatches.copy()
@@ -147,7 +112,6 @@ class Person:
             print(f'{self.name} is a perfect match with {self.perfectMatch.name}!\n')
         else:
             print(f'{self.name}\'s possible matches:')
-            currentOdds = self.odds.calculateCurrentOdds(self.possibleMatches)
             for matchName in currentOdds:
                 print(f'{self.name} - {matchName} - {currentOdds[matchName]}')
             print('')
