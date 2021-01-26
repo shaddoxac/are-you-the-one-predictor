@@ -1,11 +1,11 @@
-lastIndex = 10 ## will go through at most the first {lastIndex} days
+lastIndex = 3 ## will go through at most the first {lastIndex} days
 
 class Possibilities:
 
     def __init__(self, males, females):
         self.possibilities = []
-        self.males = males
-        self.females = females
+        self.males = males.copy()
+        self.females = females.copy()
         self.numMales = len(males)
         self.numFemales = len(females)
         self.foundPossibilities = 0
@@ -30,7 +30,7 @@ class Possibilities:
 
             self.possibilities.append(self.maleIndexes.copy())
             self.foundPossibilities += 1
-            if self.foundPossibilities % 10000 == 0:
+            if self.foundPossibilities % 100000 == 0:
                 print(f'{self.foundPossibilities} possibilities found.')
 
         else:
@@ -45,35 +45,39 @@ class Possibilities:
 
 
     def filterPerfectMatch(self, combination, maleIndex, femaleIndex):
-        combination[maleIndex] == femaleIndex
+        return combination[maleIndex] == femaleIndex
 
     def filterFailedMatch(self, combination, maleIndex, femaleIndex):
-        combination[maleIndex] != femaleIndex
+        return combination[maleIndex] != femaleIndex
 
 
     def truthBoothPerfectMatch(self, maleIndex, femaleIndex):
-        self.possibilities = filter(lambda combination: self.filterPerfectMatch(combination, maleIndex, femaleIndex), self.possibilities)
+        self.possibilities = list(filter(lambda combination: self.filterPerfectMatch(combination, maleIndex, femaleIndex), self.possibilities))
 
     def truthBoothFailedMatch(self, maleIndex, femaleIndex):
-        self.possibilities = filter(lambda combination: self.filterFailedMatch(combination, maleIndex, femaleIndex), self.possibilities)
+        self.possibilities = list(filter(lambda combination: self.filterFailedMatch(combination, maleIndex, femaleIndex), self.possibilities))
 
 
     def filterLights(self, combination, lightMatchups, numLights):
         for index in range(0, self.numMales):
+            # print(f'index = {index}, lightMatchups[index] = {lightMatchups[index]}, combination[index] = {combination[index]}')
             if lightMatchups[index] == combination[index]:
+                # print(f'decrementing {numLights}')
                 numLights -= 1
                 if numLights < 0: # if we've already exceeded our limit, just go ahead and return false
                     return False
 
+        # print(f'numLights: {numLights}')
         return numLights == 0 # if number of found matches turned expectedCount exactly to 0, this situation is possible
 
     def updateLights(self, lightMatchups, numLights):
-        self.possibilities = filter(lambda combination: self.filterLights(combination, lightMatchups, numLights), self.possibilities)
+        self.possibilities = list(filter(lambda combination: self.filterLights(combination, lightMatchups, numLights), self.possibilities))
 
     def getAllProbabilities(self):
         probabilities = [{}] * self.numMales
         for poss in self.possibilities:
             for maleIndex in poss:
+                femaleIndex = poss[maleIndex]
                 if femaleIndex not in probabilities[maleIndex]:
                     probabilities[maleIndex][femaleIndex] = 1
                 else:
@@ -82,8 +86,11 @@ class Possibilities:
         finalProbabilities = []
         divisor = self.numRemainingCombinations()
 
-        for prob in probabilities:
-            finalProbabilities.append(map(prob, lambda numMatches: numMatches * 1.0 / divisor))
+        for maleIndex in range(0, len(probabilities)):
+            maleProbDict = {}
+            for femaleIndex in probabilities[maleIndex]:
+                maleProbDict[femaleIndex] = probabilities[maleIndex][femaleIndex] * 1.0 / divisor
+            finalProbabilities.append(maleProbDict)
 
         return finalProbabilities
 
@@ -92,81 +99,26 @@ class Possibilities:
         for maleIndex in range(0, self.numMales):
             maleProbs = probs[maleIndex]
             if (len(maleProbs) == 1):
-                print(f'{self.males[maleIndex]} is a perfect match with {self.females[0]]}!\n')
+                print(f'{self.males[maleIndex]} is a perfect match with {self.females[0]}!\n')
             else:
                 print(f'{self.males[maleIndex]}\'s possible matches:')
                 for femaleIndex in maleProbs:
                     print(f'{self.males[maleIndex]} - {self.females[femaleIndex]} - {maleProbs[femaleIndex]}')
                 print('')
 
-class Person:
-    def __init__(self, name, isMale):
-        self.name = name
-        self.isMale = isMale
-        self.perfectMatch = None
-
-    def setupPartners(self, possibleMatches):
-        self.possibleMatches = possibleMatches.copy()
-
-    def hasPerfectMatch(self):
-        return self.perfectMatch != None
-
-    def becomeMatched(self, other):
-        self.perfectMatch = other
-        # clear other matches
-        self.possibleMatches = {(other.name, other)}
-
-    def isPerfectMatchWith(self, other):
-        return self.hasPerfectMatch() and self.perfectMatch.name == other.name
-
-    def printMatches(self):
-        if (self.hasPerfectMatch()):
-            print(f'{self.name} is a perfect match with {self.perfectMatch.name}!\n')
-        else:
-            print(f'{self.name}\'s possible matches:')
-            for matchName in self.possibleMatches:
-                print(f'{self.name} - {matchName}')
-            print('')
-
-    def printOdds(self):
-        if (self.hasPerfectMatch()):
-            print(f'{self.name} is a perfect match with {self.perfectMatch.name}!\n')
-        else:
-            print(f'{self.name}\'s possible matches:')
-            currentOdds = self.calculateCurrentOdds(self.possibleMatches)
-            for matchName in currentOdds:
-                print(f'{self.name} - {matchName} - {currentOdds[matchName]}')
-            print('')
-
-    def unmatch(self, value):
-        if value in self.possibleMatches:
-            self.possibleMatches.pop(value)
-
-    def addLightOdds(self, matchName, numerator, divisor):
-        self.odds.add(matchName, numerator, divisor)
-
 
 
 maleNames = ['Adam', 'Dre', 'Scali', 'Chris T', 'Dillan', 'Ethan', 'Joey', 'JJ', 'Ryan', 'Wes']
-males = dict(map(lambda name: (name, Person(name, True)), maleNames))
 maleIndexMap = {} ## this can be moved to probabilities
-for maleIndex in range(0, len(males)):
+for maleIndex in range(0, len(maleNames)):
     maleIndexMap[maleNames[maleIndex]] = maleIndex
 
 femaleNames = ['Amber', 'Ashleigh', 'Brittany', 'Coleysia', 'Jacy', 'Jess', 'Kayla', 'Paige', 'Shanley', 'Simone']
-females = dict(map(lambda name: (name, Person(name, False)), femaleNames))
 femaleIndexMap = {}
-for femaleIndex in range(0, len(females)):
+for femaleIndex in range(0, len(femaleNames)):
     femaleIndexMap[femaleNames[femaleIndex]] = femaleIndex
 
-
-for maleName in males:
-    males[maleName].setupPartners(females)
-
-for femaleName in females:
-    females[femaleName].setupPartners(males)
-
-possibilities = Possibilities(males, females)
+possibilities = Possibilities(maleNames, femaleNames)
 print(f'Remaining combinations: {possibilities.numRemainingCombinations()}')
 
 truthBooths = []
@@ -188,33 +140,35 @@ lights.append((2, [('Adam', 'Brittany'), ('Dre', 'Ashleigh'), ('Scali', 'Paige')
 
 
 for i in range(0, min(lastIndex, len(truthBooths))):
-    (pairMaleName, pairFemaleName, isPerfectMatch) = truthBooths[i]
-    pairMale   = maleIndexMap[pairMaleName]
-    pairFemale = femaleIndexMap[femalePairName]
+    (maleMatchName, femaleMatchName, isPerfectMatch) = truthBooths[i]
+    pairMale   = maleIndexMap[maleMatchName]
+    pairFemale = femaleIndexMap[femaleMatchName]
 
     if isPerfectMatch:
         possibilities.truthBoothPerfectMatch(pairMale, pairFemale)
     else: # no match.. :(
         possibilities.truthBoothFailedMatch(pairMale, pairFemale)
 
-    print(f'Remaining combinations: {possibilities.numRemainingCombinations()}')
+    print(f'After truth booth {i} - remaining combinations: {possibilities.numRemainingCombinations()}')
 
 
 # handle [0-lastIndex] lights
 for i in range (0, min(lastIndex, len(lights))):
-    (lights, testedMatches) = lights[i]
+    (numLights, testedMatches) = lights[i]
 
-    lightIndexes = []
+    lightIndexes = {}
 
     for (maleMatchName, femaleMatchName) in testedMatches:
-        pairMale   = maleIndexMap[pairMaleName]
-        pairFemale = femaleIndexMap[femalePairName]
-        lightIndexes.append((pairMale, pairFemale))
+        pairMale   = maleIndexMap[maleMatchName]
+        pairFemale = femaleIndexMap[femaleMatchName]
+        lightIndexes[pairMale] = pairFemale
 
-    possibilities.updateLights(lightIndexes, lights)
+    possibilities.updateLights(lightIndexes, numLights)
 
-    print(f'Remaining combinations: {possibilities.numRemainingCombinations()}')
+    print(f'Night {i} - remaining combinations: {possibilities.numRemainingCombinations()}')
 
 
 
-print(f'Remaining combinations: {possibilities.numRemainingCombinations()}')
+print(f'Final remaining combinations: {possibilities.numRemainingCombinations()}')
+
+possibilities.printAllProbabilities()
