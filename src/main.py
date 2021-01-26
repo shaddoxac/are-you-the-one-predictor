@@ -47,8 +47,15 @@ class Possibilities:
     def filterPerfectMatch(self, combination, maleIndex, femaleIndex):
         combination[maleIndex] == femaleIndex
 
-    def updatePerfectMatch(self, maleIndex, femaleIndex):
+    def filterFailedMatch(self, combination, maleIndex, femaleIndex):
+        combination[maleIndex] != femaleIndex
+
+
+    def truthBoothPerfectMatch(self, maleIndex, femaleIndex):
         self.possibilities = filter(lambda combination: self.filterPerfectMatch(combination, maleIndex, femaleIndex), self.possibilities)
+
+    def truthBoothFailedMatch(self, maleIndex, femaleIndex):
+        self.possibilities = filter(lambda combination: self.filterFailedMatch(combination, maleIndex, femaleIndex), self.possibilities)
 
 
     def filterLights(self, combination, lightMatchups, numLights):
@@ -85,7 +92,7 @@ class Possibilities:
         for maleIndex in range(0, self.numMales):
             maleProbs = probs[maleIndex]
             if (len(maleProbs) == 1):
-                print(f'{self.males[maleIndex]} is a perfect match with {self.females[0]}!\n')
+                print(f'{self.males[maleIndex]} is a perfect match with {self.females[0]]}!\n')
             else:
                 print(f'{self.males[maleIndex]}\'s possible matches:')
                 for femaleIndex in maleProbs:
@@ -126,6 +133,7 @@ class Person:
             print(f'{self.name} is a perfect match with {self.perfectMatch.name}!\n')
         else:
             print(f'{self.name}\'s possible matches:')
+            currentOdds = self.calculateCurrentOdds(self.possibleMatches)
             for matchName in currentOdds:
                 print(f'{self.name} - {matchName} - {currentOdds[matchName]}')
             print('')
@@ -141,9 +149,16 @@ class Person:
 
 maleNames = ['Adam', 'Dre', 'Scali', 'Chris T', 'Dillan', 'Ethan', 'Joey', 'JJ', 'Ryan', 'Wes']
 males = dict(map(lambda name: (name, Person(name, True)), maleNames))
+maleIndexMap = {} ## this can be moved to probabilities
+for maleIndex in range(0, len(males)):
+    maleIndexMap[maleNames[maleIndex]] = maleIndex
 
 femaleNames = ['Amber', 'Ashleigh', 'Brittany', 'Coleysia', 'Jacy', 'Jess', 'Kayla', 'Paige', 'Shanley', 'Simone']
 females = dict(map(lambda name: (name, Person(name, False)), femaleNames))
+femaleIndexMap = {}
+for femaleIndex in range(0, len(females)):
+    femaleIndexMap[femaleNames[femaleIndex]] = femaleIndex
+
 
 for maleName in males:
     males[maleName].setupPartners(females)
@@ -172,71 +187,34 @@ lights.append((2, [('Adam', 'Brittany'), ('Dre', 'Ashleigh'), ('Scali', 'Paige')
 # lights.append((2, [('Adam', ''), ('Dre', ''), ('Scali', ''), ('Chris T', ''), ('Dillan', ''), ('Ethan', ''), ('Joey', ''), ('JJ', ''), ('Ryan', ''), ('Wes', '')]))
 
 
-
 for i in range(0, min(lastIndex, len(truthBooths))):
     (pairMaleName, pairFemaleName, isPerfectMatch) = truthBooths[i]
-    pairMale = males[pairMaleName]
-    pairFemale = females[pairFemaleName]
-    # male.printMatches()
-    # female.printMatches()
+    pairMale   = maleIndexMap[pairMaleName]
+    pairFemale = femaleIndexMap[femalePairName]
 
     if isPerfectMatch:
-        pairMale.becomeMatched(pairFemale)
-        pairFemale.becomeMatched(pairMale)
-
-        for mName in males:
-            males[mName].unmatch(pairFemaleName)
-        for fName in females:
-            females[fName].unmatch(pairMaleName)
+        possibilities.truthBoothPerfectMatch(pairMale, pairFemale)
     else: # no match.. :(
-        pairMale.unmatch(pairFemaleName)
-        pairFemale.unmatch(pairMaleName)
+        possibilities.truthBoothFailedMatch(pairMale, pairFemale)
+
+    print(f'Remaining combinations: {possibilities.numRemainingCombinations()}')
 
 
 # handle [0-lastIndex] lights
 for i in range (0, min(lastIndex, len(lights))):
-    (unknownLights, testedMatches) = lights[i]
-    possibleMatches = 10 ## will decrement as 'wrong' matches are discovered
+    (lights, testedMatches) = lights[i]
 
-    toExamine = []
+    lightIndexes = []
 
     for (maleMatchName, femaleMatchName) in testedMatches:
-        maleMatch = males[maleMatchName]
-        femaleMatch = females[femaleMatchName]
+        pairMale   = maleIndexMap[pairMaleName]
+        pairFemale = femaleIndexMap[femalePairName]
+        lightIndexes.append((pairMale, pairFemale))
 
-        if maleMatch.isPerfectMatchWith(femaleMatch):
-            # treat this case as a known, can disregard 1 light
-            unknownLights -= 1
-            possibleMatches -= 1
-        elif femaleMatchName in maleMatch.possibleMatches:
-            # matches are reciprocal, only have to check one
-            # these are possible, let's look at the odds after seeing all couples
-            toExamine.append((maleMatch, femaleMatch))
-        else:
-            # can't be a match
-            possibleMatches -= 1
+    possibilities.updateLights(lightIndexes, lights)
 
-    print(f'{unknownLights} of the next {len(toExamine)} are matches!')
-
-    divisor = len(toExamine)
-    # print(unknownLights)
-    # print(divisor)
-    odds = (unknownLights * 100.0) / divisor # assuming an even distribution across all matched couples
-    for (maleMatch, femaleMatch) in toExamine:
-        print(f'{maleMatch.name} and {femaleMatch.name} have {odds}% of being a match')
-        if (odds == 0):
-            maleMatch.unmatch(femaleMatch.name)
-            femaleMatch.unmatch(maleMatch.name)
-        else:
-            maleMatch.addLightOdds(femaleMatch.name, unknownLights, divisor)
-
-
-for maleName in males:
-    # males[maleName].printMatches()
-    males[maleName].printOdds()
+    print(f'Remaining combinations: {possibilities.numRemainingCombinations()}')
 
 
 
-# other notes
-# secondary group (either males or females, arbitrary) doesn't need to be tracked, as all relationships are
-# reciprocal and displayed on one group as the other. Primary group can track everything
+print(f'Remaining combinations: {possibilities.numRemainingCombinations()}')
