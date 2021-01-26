@@ -74,9 +74,23 @@ class Possibilities:
 
         finalProbabilities = []
         divisor = self.numRemainingCombinations()
-        
+
         for prob in probabilities:
             finalProbabilities.append(map(prob, lambda numMatches: numMatches * 1.0 / divisor))
+
+        return finalProbabilities
+
+    def printAllProbabilities(self):
+        probs = self.getAllProbabilities()
+        for maleIndex in range(0, self.numMales):
+            maleProbs = probs[maleIndex]
+            if (len(maleProbs) == 1):
+                print(f'{self.males[maleIndex]} is a perfect match with {self.females[0]}!\n')
+            else:
+                print(f'{self.males[maleIndex]}\'s possible matches:')
+                for femaleIndex in maleProbs:
+                    print(f'{self.males[maleIndex]} - {self.females[femaleIndex]} - {maleProbs[femaleIndex]}')
+                print('')
 
 class Person:
     def __init__(self, name, isMale):
