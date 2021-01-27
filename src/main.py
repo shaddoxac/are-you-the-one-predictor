@@ -74,23 +74,26 @@ class Possibilities:
         self.possibilities = list(filter(lambda combination: self.filterLights(combination, lightMatchups, numLights), self.possibilities))
 
     def getAllProbabilities(self):
-        probabilities = [{}] * self.numMales
+        probabilities = []
+        finalProbabilities = []
+
+        for i in range(0, self.numMales):
+            probabilities.append({})
+            finalProbabilities.append({})
+
         for poss in self.possibilities:
-            for maleIndex in poss:
+            for maleIndex in range(0, self.numMales):
                 femaleIndex = poss[maleIndex]
                 if femaleIndex not in probabilities[maleIndex]:
                     probabilities[maleIndex][femaleIndex] = 1
                 else:
                     probabilities[maleIndex][femaleIndex] += 1
 
-        finalProbabilities = []
         divisor = self.numRemainingCombinations()
 
-        for maleIndex in range(0, len(probabilities)):
-            maleProbDict = {}
+        for maleIndex in range(0, self.numMales):
             for femaleIndex in probabilities[maleIndex]:
-                maleProbDict[femaleIndex] = probabilities[maleIndex][femaleIndex] * 1.0 / divisor
-            finalProbabilities.append(maleProbDict)
+                finalProbabilities[maleIndex][femaleIndex] = (probabilities[maleIndex][femaleIndex] * 1.0) / divisor
 
         return finalProbabilities
 
