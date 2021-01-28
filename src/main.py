@@ -1,4 +1,36 @@
-lastIndex = 3 ## will go through at most the first {lastIndex} days
+import argparse
+import pandas
+
+
+parser = argparse.ArgumentParser(description='Generate possible combinations for MTV\'s Are You The One :).')
+parser.add_argument('season', help='the path to a season directory in the resources directory')
+args = parser.parse_args()
+
+seasonDirectory = f'resources/{args.season}/'
+maleNames = []
+femaleNames = []
+truthBooths = []
+lights = []
+
+names = pandas.read_csv(f'{seasonDirectory}names.csv')
+for index, row in names.iterrows():
+    if row['sex'] == 'F':
+        femaleNames.append(row['name'])
+    else:
+        maleNames.append(row['name'])
+
+truthBoothDF = pandas.read_csv(f'{seasonDirectory}truthBooths.csv')
+for index, row in truthBoothDF.iterrows():
+    truthBooths.append(row)
+
+lightDF = pandas.read_csv(f'{seasonDirectory}lights.csv')
+for index, row in lightDF.iterrows():
+    numLights = row['lights']
+    pairs = []
+    for i in range(0, len(maleNames)):
+        pairs.append((row[f'm{i}'], row[f'f{i}']))
+    lights.append((numLights, pairs))
+
 
 class Possibilities:
 
@@ -111,12 +143,10 @@ class Possibilities:
 
 
 
-maleNames = ['Adam', 'Dre', 'Scali', 'Chris T', 'Dillan', 'Ethan', 'Joey', 'JJ', 'Ryan', 'Wes']
 maleIndexMap = {} ## this can be moved to probabilities
 for maleIndex in range(0, len(maleNames)):
     maleIndexMap[maleNames[maleIndex]] = maleIndex
 
-femaleNames = ['Amber', 'Ashleigh', 'Brittany', 'Coleysia', 'Jacy', 'Jess', 'Kayla', 'Paige', 'Shanley', 'Simone']
 femaleIndexMap = {}
 for femaleIndex in range(0, len(femaleNames)):
     femaleIndexMap[femaleNames[femaleIndex]] = femaleIndex
@@ -124,26 +154,13 @@ for femaleIndex in range(0, len(femaleNames)):
 possibilities = Possibilities(maleNames, femaleNames)
 print(f'Remaining combinations: {possibilities.numRemainingCombinations()}')
 
-truthBooths = []
-truthBooths.append(('Chris T', 'Shanley',  False))
-truthBooths.append(('Ethan',   'Jess',     False))
-truthBooths.append(('Dillan',  'Jess',     False))
-truthBooths.append(('JJ',      'Simone',   False))
-truthBooths.append(('Dre',     'Ashleigh', False))
-truthBooths.append(('Dillan',  'Coleysia', True))
-truthBooths.append(('Chris T', 'Paige',    True))
-truthBooths.append(('Ryan',    'Kayla',    False))
 
-lights = []
-lights.append((2, [('Adam', 'Brittany'), ('Dre', 'Jacy'), ('Scali', 'Ashleigh'), ('Chris T', 'Jess'), ('Dillan', 'Coleysia'), ('Ethan', 'Shanley'), ('Joey', 'Paige'), ('JJ', 'Simone'), ('Ryan', 'Amber'), ('Wes', 'Kayla')]))
-lights.append((4, [('Adam', 'Shanley'), ('Dre', 'Ashleigh'), ('Scali', 'Simone'), ('Chris T', 'Paige'), ('Dillan', 'Jess'), ('Ethan', 'Amber'), ('Joey', 'Brittany'), ('JJ', 'Jacy'), ('Ryan', 'Kayla'), ('Wes', 'Coleysia')]))
-lights.append((2, [('Adam', 'Brittany'), ('Dre', 'Ashleigh'), ('Scali', 'Paige'), ('Chris T', 'Simone'), ('Dillan', 'Coleysia'), ('Ethan', 'Amber'), ('Joey', 'Shanley'), ('JJ', 'Jess'), ('Ryan', 'Kayla'), ('Wes', 'Jacy')]))
-
-# lights.append((2, [('Adam', ''), ('Dre', ''), ('Scali', ''), ('Chris T', ''), ('Dillan', ''), ('Ethan', ''), ('Joey', ''), ('JJ', ''), ('Ryan', ''), ('Wes', '')]))
-
-
-for i in range(0, min(lastIndex, len(truthBooths))):
-    (maleMatchName, femaleMatchName, isPerfectMatch) = truthBooths[i]
+# handle [0-lastIndex] lights
+for i in range (0, min(len(truthBooths), len(lights))):
+    ## handle truth booths
+    maleMatchName = truthBooths[i].maleName
+    femaleMatchName = truthBooths[i].femaleName
+    isPerfectMatch = truthBooths[i].isMatch
     pairMale   = maleIndexMap[maleMatchName]
     pairFemale = femaleIndexMap[femaleMatchName]
 
@@ -154,9 +171,7 @@ for i in range(0, min(lastIndex, len(truthBooths))):
 
     print(f'After truth booth {i} - remaining combinations: {possibilities.numRemainingCombinations()}')
 
-
-# handle [0-lastIndex] lights
-for i in range (0, min(lastIndex, len(lights))):
+    ## handle lights
     (numLights, testedMatches) = lights[i]
 
     lightIndexes = {}
