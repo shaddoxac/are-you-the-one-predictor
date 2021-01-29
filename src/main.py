@@ -134,7 +134,8 @@ class Possibilities:
         for maleIndex in range(0, self.numMales):
             maleProbs = probs[maleIndex]
             if (len(maleProbs) == 1):
-                print(f'{self.males[maleIndex]} is a perfect match with {self.females[0]}!\n')
+                for femaleIndex in maleProbs:
+                    print(f'{self.males[maleIndex]} is a perfect match with {self.females[femaleIndex]}!\n')
             else:
                 print(f'{self.males[maleIndex]}\'s possible matches:')
                 for femaleIndex in maleProbs:
