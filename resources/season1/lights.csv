@@ -1,4 +1,8 @@
 lights,m0,f0,m1,f1,m2,f2,m3,f3,m4,f4,m5,f5,m6,f6,m7,f7,m8,f8,m9,f9
-2,Adam,Brittany,Dre,Jacy,Scali,Ashleigh,ChrisT,Jess,Dillan,Coleysia,Ethan,Shanley,Joey,Paige,JJ,Simone,Ryan,Amber,Wes,Kayla
-4,Adam,Shanley,Dre,Ashleigh,Scali,Simone,ChrisT,Paige,Dillan,Jess,Ethan,Amber,Joey,Brittany,JJ,Jacy,Ryan,Kayla,Wes,Coleysia
-2,Adam,Brittany,Dre,Ashleigh,Scali,Paige,ChrisT,Simone,Dillan,Coleysia,Ethan,Amber,Joey,Shanley,JJ,Jess,Ryan,Kayla,Wes,Jacy
+2,Adam,Brittany,Dre,Jacey,Scali,Ashleigh,ChrisT,Jess,Dillan,Coleysia,Ethan,Shanley,Joey,Paige,JJ,Simone,Ryan,Amber,Wes,Kayla
+4,Adam,Shanley,Dre,Ashleigh,Scali,Simone,ChrisT,Paige,Dillan,Jess,Ethan,Amber,Joey,Brittany,JJ,Jacey,Ryan,Kayla,Wes,Coleysia
+2,Adam,Brittany,Dre,Ashleigh,Scali,Paige,ChrisT,Simone,Dillan,Coleysia,Ethan,Amber,Joey,Shanley,JJ,Jess,Ryan,Kayla,Wes,Jacey
+2,Dillan,Coleysia,Scali,Paige,Wes,Jess,Dre,Simone,Ryan,Brittany,Ethan,Kayla,Adam,Amber,ChrisT,Ashleigh,JJ,Shanley,Joey,Jacey
+5,Ethan,Amber,Joey,Jess,Wes,Kayla,JJ,Jacey,Scali,Simone,Adam,Shanley,ChrisT,Paige,Dre,Brittany,Ryan,Ashleigh,Dillan,Coleysia
+5,JJ,Jacey,Wes,Kayla,Dre,Shanley,Scali,Brittany,Adam,Ashleigh,Joey,Simone,Ryan,Jess,Ethan,Amber,ChrisT,Paige,Dillan,Coleysia
+7,Wes,Kayla,Scali,Jacey,Ethan,Amber,Joey,Jess,Dre,Simone,Ryan,Ashleigh,Adam,Shanley,JJ,Brittany,ChrisT,Paige,Dillan,Coleysia
